@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Retail Sales Chatbot</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f8;
+margin:0;
+}
+
+.container{
+display:flex;
+height:100vh;
+}
+
+.left-panel{
+width:25%;
+background:#0c5db6;
+padding:20px;
+color:white;
+}
+
+.box{
+background:#1a6ad6;
+padding:15px;
+margin-bottom:20px;
+border-radius:5px;
+}
+
+.suggestion-btn{
+display:block;
+width:100%;
+padding:8px;
+margin:5px 0;
+border:none;
+background:white;
+color:black;
+cursor:pointer;
+}
+
+.right-panel{
+width:75%;
+padding:20px;
+}
+
+.chat-box{
+background:white;
+height:450px;
+border:1px solid #ddd;
+padding:15px;
+overflow-y:auto;
+}
+
+.input-area{
+margin-top:15px;
+display:flex;
+}
+
+input{
+flex:1;
+padding:10px;
+border:1px solid #ccc;
+}
+
+button{
+padding:10px 20px;
+margin-left:5px;
+background:#0c5db6;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left-panel">
+
+<div class="box">
+<h3>Chat History</h3>
+<div id="history"></div>
+</div>
+
+<div class="box">
+<h3>Question Suggestions</h3>
+
+<h3>Question Suggestions</h3>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show total revenue')">Total Revenue</button>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show yearly sales')">Yearly Sales</button>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show monthly sales')">Monthly Sales</button>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show sales by region')">Sales by Region</button>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show product category sales')">Product Category Sales</button>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show top products')">Top Products</button>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show promo sales')">Promo Sales</button>
+
+<button class="suggestion-btn" onclick="sendSuggestion('Show total transactions')">Total Transactions</button>
+</div>
+
+</div>
+
+
+<div class="right-panel">
+
+<h2>Chat Bot</h2>
+
+<div class="chat-box" id="chatbox"></div>
+
+<div class="input-area">
+
+<input type="text" id="userInput" placeholder="Ask your question">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+<p id="processingTime">Query Processing Time:</p>
+
+<button onclick="downloadReport()">Download Report</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+function sendMessage(message=null){
+
+let input=document.getElementById("userInput")
+let question= message ? message : input.value
+
+fetch("/chat",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+message:question
+})
+
+})
+.then(res=>res.json())
+.then(data=>{
+
+let chat=document.getElementById("chatbox")
+
+chat.innerHTML +=
+"<p><b>Q:</b> "+question+"</p>" +
+"<p><b>A:</b> "+data.explanation+"</p>"
+
+if(data.chart){
+chat.innerHTML += "<img src='"+data.chart+"' width='400'>"
+}
+
+chat.innerHTML += "<hr>"
+
+document.getElementById("processingTime").innerText =
+"Query Processing Time: "+data.processing_time+" sec"
+
+
+let historyBox=document.getElementById("history")
+historyBox.innerHTML=""
+
+data.history.forEach(function(item){
+
+historyBox.innerHTML +=
+"<p>"+item.question+"</p>"
+
+})
+
+input.value=""
+
+})
+
+}
+
+
+function sendSuggestion(q){
+
+sendMessage(q)
+
+}
+
+
+function downloadReport(){
+
+window.location="/download"
+
+}
+
+</script>
+
+</body>
+</html>
